@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Animation</title>
+    <style>
+        body{
+            overflow: hidden;
+            margin: 0;
+        }
+        #canvas1{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas1"></canvas>
+    <script>
+        const canvas = document.querySelector('#canvas1');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let number = 0;
+        let scale = 8;  // Adjust speed of star growth
+        let size = 0;
+        let points = 5;  // Number of points for each star
+
+        function drawStar(x, y, radius, points, rotation) {
+            const angle = Math.PI / points;
+            ctx.beginPath();
+            for (let i = 0; i < points * 2; i++) {
+                const currentAngle = rotation + i * angle;
+                const radiusToUse = i % 2 === 0 ? radius : radius / 2;  // Alternate between outer and inner radius
+                const positionX = x + radiusToUse * Math.cos(currentAngle);
+                const positionY = y + radiusToUse * Math.sin(currentAngle);
+                if (i === 0) {
+                    ctx.moveTo(positionX, positionY);
+                } else {
+                    ctx.lineTo(positionX, positionY);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function drawFlower() {
+            const maxRadius = Math.sqrt(Math.pow(canvas.width, 2) + Math.pow(canvas.height, 2)) / 2;
+            // Number of concentric rings of stars
+            const ringCount = Math.floor(number / 10) + 1;  // Increase the number of rings gradually
+            for (let ring = 0; ring < ringCount; ring++) {
+                let radius = scale * (number + ring * 10); // Increasing radius for each ring
+                if (radius > maxRadius) {
+                    number = 0;
+                    size = 0;
+                }
+                // Adjust rotation speed for stars in different rings
+                let rotationSpeed = (number * 0.05) + (ring * 0.1);
+                for (let i = 0; i < 20; i++) {
+                    let angle = (Math.PI * 2 * i) / 20 + rotationSpeed;  // Rotate individual stars
+                    let positionX = radius * Math.cos(angle) + canvas.width / 2;
+                    let positionY = radius * Math.sin(angle) + canvas.height / 2;
+                    let maxSize = Math.min(canvas.width, canvas.height) * 0.05;
+                    size = Math.min(number * 0.4, maxSize); // Adjust size for bigger stars
+                    // Fill and stroke colors for the stars
+                    ctx.fillStyle = `hsl(${(number * 10) % 360}, 70%, 50%)`;  // Hue changes based on 'number'
+                    ctx.strokeStyle = `hsl(${(number * 10 + 180) % 360}, 70%, 40%)`;  // Stroke color
+                    ctx.lineWidth = 3;
+                    drawStar(positionX, positionY, size, points, number * 0.1);  // Draw spinning stars
+                }
+            }
+            number += 0.8; // Speed of growth and rotation for stars
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(75, 0, 130, 0.7)';  // Dark purple background
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawFlower();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
